@@ -1,1 +1,110 @@
-<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Deadlock / match evidence</title><link rel="stylesheet" href="style.css"><body><header><a href="https://github.com/LolStar123/deadlock-match-analysis">deadlock / match evidence</a><a href="https://atul-kanodia-fieldnotes.atulswaggalicious.chatgpt.site">atul's projects</a></header><main><div class="heading"><div><p class="eyebrow">a question from the match history</p><h1>which leads<br>actually hold?</h1></div><p class="scope" id="scope">loading the collected matches...</p></div><div class="workbench"><aside><h2>choose the condition</h2><label>compare teams by<select id="metric"></select></label><label>minimum lead <strong id="lead-label"></strong><input id="threshold" type="range" min="0" max="20000" step="1000" value="0"></label><label>match duration<select id="duration"><option value="0,120">all durations</option><option value="0,25">under 25 minutes</option><option value="25,40">25 to 40 minutes</option><option value="40,120">40 minutes or longer</option></select></label><p id="context"></p><button id="download">export selected matches</button><details><summary>what the comparison means</summary><p>Each dot is one actual match. We identify the team leading the chosen metric, then count how often that team won. Ties and missing checkpoints are excluded. The interval is a 95% Wilson interval; it expresses sampling uncertainty, not causal certainty.</p><p>Changing the question after seeing the result can exaggerate findings. Match conditions, heroes and player skill still matter.</p></details></aside><section><div class="result"><span><strong id="win-rate">...</strong><small>leading team's win rate</small></span><span><strong id="sample">...</strong><small>matches meeting your condition</small></span><span><strong id="interval">...</strong><small>95% confidence interval</small></span></div><h2 id="chart-title">win rate by lead size</h2><div id="chart"></div><p class="legend">horizontal: lead size / vertical: observed win rate / whiskers: 95% interval</p><div class="dot-heading"><h2>the matches behind the percentage</h2><span><i class="win"></i> lead held <i class="loss"></i> lead lost</span></div><div id="dots" aria-label="Individual match outcomes"></div><p class="legend" id="dot-note"></p><p id="match-detail" role="status">Select a match to inspect its recorded condition and result.</p></section></div><footer>Historical collection. Checkpoints: May 2026 onward. End-state associations are not forecasts. <a href="data/matches.json">download the source dataset</a> / <a href="https://github.com/LolStar123/deadlock-match-analysis/blob/main/tools/export_matches.py">aggregation code</a></footer></main><script type="module" src="app.mjs"></script></body></html>
+<!doctype html>
+<html lang="en">
+    <meta charset="utf-8" /><meta
+        name="viewport"
+        content="width=device-width,initial-scale=1"
+    /><title>Deadlock / match evidence</title
+    ><link rel="stylesheet" href="style.css" />
+    <body>
+        <header>
+            <a href="https://github.com/LolStar123/deadlock-match-analysis"
+                >deadlock / match evidence</a
+            ><a
+                href="https://atul-kanodia-fieldnotes.atulswaggalicious.chatgpt.site"
+                >atul's projects</a
+            >
+        </header>
+        <main>
+            <div class="heading">
+                <div>
+                    <p class="eyebrow">a question from the match history</p>
+                    <h1>which leads<br />actually hold?</h1>
+                </div>
+                <p class="scope" id="scope">loading the collected matches...</p>
+            </div>
+            <div class="workbench">
+                <aside>
+                    <h2>choose the condition</h2>
+                    <label>compare teams by<select id="metric"></select></label
+                    ><label
+                        >minimum lead <strong id="lead-label"></strong
+                        ><input
+                            id="threshold"
+                            type="range"
+                            min="0"
+                            max="20000"
+                            step="1000"
+                            value="0" /></label
+                    ><label
+                        >match duration<select id="duration">
+                            <option value="0,120">all durations</option>
+                            <option value="0,25">under 25 minutes</option>
+                            <option value="25,40">25 to 40 minutes</option>
+                            <option value="40,120">40 minutes or longer</option>
+                        </select></label
+                    >
+                    <p id="context"></p>
+                    <button id="download">export selected matches</button>
+                    <details>
+                        <summary>what the comparison means</summary>
+                        <p>
+                            Each dot is one actual match. We identify the team
+                            leading the chosen metric, then count how often that
+                            team won. Ties and missing checkpoints are excluded.
+                            The interval is a 95% Wilson interval; it expresses
+                            sampling uncertainty, not causal certainty.
+                        </p>
+                        <p>
+                            Changing the question after seeing the result can
+                            exaggerate findings. Match conditions, heroes and
+                            player skill still matter.
+                        </p>
+                    </details>
+                </aside>
+                <section>
+                    <div class="result">
+                        <span
+                            ><strong id="win-rate">...</strong
+                            ><small>leading team's win rate</small></span
+                        ><span
+                            ><strong id="sample">...</strong
+                            ><small>matches meeting your condition</small></span
+                        ><span
+                            ><strong id="interval">...</strong
+                            ><small>95% confidence interval</small></span
+                        >
+                    </div>
+                    <h2 id="chart-title">win rate by lead size</h2>
+                    <div id="chart"></div>
+                    <p class="legend">
+                        horizontal: lead size / vertical: observed win rate /
+                        whiskers: 95% interval
+                    </p>
+                    <div class="dot-heading">
+                        <h2>the matches behind the percentage</h2>
+                        <span
+                            ><i class="win"></i> lead held
+                            <i class="loss"></i> lead lost</span
+                        >
+                    </div>
+                    <div id="dots" aria-label="Individual match outcomes"></div>
+                    <p class="legend" id="dot-note"></p>
+                    <p id="match-detail" role="status">
+                        Select a match to inspect its recorded condition and
+                        result.
+                    </p>
+                </section>
+            </div>
+            <footer>
+                Historical collection. Checkpoints: May 2026 onward. End-state
+                associations are not forecasts.
+                <a href="data/matches.json">download the source dataset</a> /
+                <a
+                    href="https://github.com/LolStar123/deadlock-match-analysis/blob/main/tools/export_matches.py"
+                    >aggregation code</a
+                >
+            </footer>
+        </main>
+        <script type="module" src="app.mjs"></script>
+    </body>
+</html>
