@@ -1,16 +1,11 @@
-# Public example provenance
+# Data provenance
 
-Prepared 22 September 2026 for Atul Kanodia's project portfolio.
+Source: Atul's existing `deadlock_analytics/urn_rows.jsonl` and `urn_checkpoints.jsonl`.
+The export contains 11,423 complete games dated 2026-05-26 to 2026-06-05.
+Only six players on each of two teams with complementary win flags are accepted.
+Team 0 minus Team 1 differences are exported, without player/account identifiers.
+Checkpoint differences are null unless all twelve players have the checkpoint.
 
-## Original work
-
-deadlock_analytics/urn_checkpoint_analyze.py and scripts/deadlock_metrics_lib.py; fixed-clock comparisons and conditional analyses.
-
-## This repository's example
-
-Generated checkpoint fixtures. Associations do not establish that changing a stat causes a win.
-
-The example was built for public inspection of the documented workflow. It is not a claim
-that the complete production application fits into this one module. Existing repository
-source retains its original history. Generated records have no customer, player, account,
-or private-message identifiers. Inputs and outputs can be exported and inspected.
+The application uses one match per observation. Tied metrics are excluded from leader
+comparisons. The plots show empirical bins, not a fitted or invented distribution.
+Selection and missingness can bias comparisons. Final-game metrics are not pregame forecasts.

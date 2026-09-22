@@ -1,93 +1,10 @@
-let seed = 937;
-const rand = () => {
-  seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
-  return seed / 4294967296;
-};
-const matches = Array.from({ length: 480 }, (_, n) => {
-  const economy = Math.round(rand() * 16000 - 8000),
-    damage = Math.round(rand() * 10000 - 5000),
-    objectives = Math.floor(rand() * 7) - 3;
-  return {
-    id: "fixture-" + n,
-    minute: 15,
-    economy,
-    damage,
-    objectives,
-    won:
-      rand() <
-      1 / (1 + Math.exp(-economy / 6500 - damage / 7000 - objectives * 0.17)),
-  };
-});
-export const defaults = { metric: "economy", threshold: 1000, matches };
-export const controls = [
-  {
-    key: "metric",
-    label: "15-minute team lead",
-    type: "select",
-    options: ["economy", "damage", "objectives"],
-  },
-  {
-    key: "threshold",
-    label: "Condition: lead at least",
-    type: "number",
-    min: -20000,
-    max: 20000,
-    step: 1,
-  },
-];
-export function interval(wins, n) {
-  if (!n) return null;
-  const z = 1.959963984540054,
-    p = wins / n,
-    d = 1 + (z * z) / n,
-    c = (p + (z * z) / (2 * n)) / d,
-    h = (z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n))) / d;
-  return [Math.max(0, c - h), Math.min(1, c + h)];
-}
-export function group(matches) {
-  const n = matches.length,
-    wins = matches.filter((r) => r.won).length;
-  return { n, wins, rate: n ? wins / n : null, interval: interval(wins, n) };
-}
-export function analyse(matches, metric, threshold) {
-  if (
-    !["economy", "damage", "objectives"].includes(metric) ||
-    !Number.isFinite(threshold)
-  )
-    throw Error("Choose a known checkpoint metric and finite threshold.");
-  const yes = matches.filter((r) => r[metric] >= threshold),
-    no = matches.filter((r) => r[metric] < threshold);
-  return { yes: group(yes), no: group(no), all: group(matches) };
-}
-export function run(i) {
-  const r = analyse(i.matches, i.metric, i.threshold),
-    pct = (x) => (x === null ? "no sample" : (x * 100).toFixed(1) + "%");
-  return {
-    summary: `P(win | ${i.metric} lead ≥ ${i.threshold})`,
-    metrics: {
-      "condition win rate": pct(r.yes.rate),
-      "comparison win rate": pct(r.no.rate),
-      "matching matches": r.yes.n,
-      "fixed checkpoint": "15 minutes",
-    },
-    columns: ["group", "matches", "wins", "win rate", "95% Wilson interval"],
-    rows: [
-      ["condition", r.yes],
-      ["comparison", r.no],
-      ["all matches", r.all],
-    ].map(([name, g]) => [
-      name,
-      g.n,
-      g.wins,
-      pct(g.rate),
-      g.interval ? g.interval.map(pct).join(" to ") : "no sample",
-    ]),
-    steps: [
-      "Collect one team record per match",
-      "Compare the same game-clock checkpoint",
-      "Split by the selected condition",
-      "Report both denominators and uncertainty",
-    ],
-    artifact: r,
-  };
+export const metrics={nw_600:{label:'souls at 10 minutes',unit:'souls',step:1000,limit:20000,checkpoint:true},nw_900:{label:'souls at 15 minutes',unit:'souls',step:2000,limit:40000,checkpoint:true},nw_1200:{label:'souls at 20 minutes',unit:'souls',step:3000,limit:60000,checkpoint:true},net_worth:{label:'final net worth',unit:'souls',step:5000,limit:100000},player_damage:{label:'hero damage',unit:'damage',step:10000,limit:200000},boss_damage:{label:'objective damage',unit:'damage',step:5000,limit:60000},kills:{label:'kills',unit:'kills',step:2,limit:50},denies:{label:'denies',unit:'denies',step:2,limit:50},gold_treasure:{label:'urn treasure',unit:'souls',step:2000,limit:40000},player_healing:{label:'healing',unit:'healing',step:2000,limit:40000}};
+export function interval(wins,n){if(!n)return null;const z=1.959963984540054,p=wins/n,d=1+z*z/n,c=(p+z*z/(2*n))/d,h=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n))/d;return [c-h,c+h];}
+export function analyse(rows,metric,minimum=0,minMinutes=0,maxMinutes=120){
+ if(!metrics[metric]||!Number.isFinite(minimum)||minimum<0)throw Error('Invalid metric or threshold');
+ const eligible=rows.filter(r=>Number.isFinite(r[metric])&&r[metric]!==0&&r.duration/60>=minMinutes&&r.duration/60<=maxMinutes).map(r=>({...r,lead:Math.abs(r[metric]),leaderWon:r[metric]>0?!!r.win:!r.win}));
+ const selected=eligible.filter(r=>r.lead>=minimum),wins=selected.filter(r=>r.leaderWon).length;
+ const max=Math.max(metrics[metric].step,...eligible.map(r=>r.lead));const width=max/12;
+ const bins=Array.from({length:12},(_,i)=>{const sample=eligible.filter(r=>r.lead>=i*width&&(i===11||r.lead<(i+1)*width)),w=sample.filter(r=>r.leaderWon).length;return{lo:i*width,hi:(i+1)*width,n:sample.length,wins:w,p:sample.length?w/sample.length:null,ci:interval(w,sample.length)}});
+ return{eligible:eligible.length,selected,wins,n:selected.length,p:selected.length?wins/selected.length:null,ci:interval(wins,selected.length),bins};
 }
