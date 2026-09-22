@@ -1,0 +1,11 @@
+{
+  "id": "deadlock",
+  "repo": "deadlock-match-analysis",
+  "title": "deadlock match analysis",
+  "caption": "Compares match conditions to find which stats are most associated with winning.",
+  "workflow": "Collect match data, take comparable checkpoints and split matches by a condition. Compare win rates for economy, damage, objectives and other stats, with sample sizes and uncertainty beside each result.",
+  "benefit": "The urn was one question. The bigger question was what actually matters.",
+  "demo": "Change a metric threshold and compare conditional win rates with confidence intervals.",
+  "source": "deadlock_analytics/urn_checkpoint_analyze.py and scripts/deadlock_metrics_lib.py; fixed-clock comparisons and conditional analyses.",
+  "boundary": "Generated checkpoint fixtures. Associations do not establish that changing a stat causes a win."
+}
