@@ -17,6 +17,9 @@ function render() {
     $("#context").textContent = m.checkpoint
         ? "This condition is measured before the match ends. It still describes association, not what would happen if a team were given extra souls."
         : "This is an end-of-match statistic. Winning can itself increase this number, so do not read it as an in-game prediction.";
+    $("#answer").textContent = result.n
+        ? `Teams leading by ${fmt(threshold)} or more ${m.unit} in ${m.label} won ${pct(result.p)} of ${fmt(result.n)} qualifying matches.`
+        : "No matches meet this condition. Lower the lead or include more match durations.";
     $("#win-rate").textContent = pct(result.p);
     $("#sample").textContent = fmt(result.n);
     $("#interval").textContent = result.ci
