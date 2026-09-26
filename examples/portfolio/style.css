@@ -257,3 +257,8 @@ footer {
     max-width: 760px;
     margin: 0 0 22px;
 }
+
+/* Tactile without becoming decorative. */
+button{transition-property:color,background-color,border-color,scale;transition-duration:120ms;transition-timing-function:cubic-bezier(.2,0,0,1)}
+button:active:not(:disabled){scale:.96}
+@media(prefers-reduced-motion:reduce){button{transition:none}}

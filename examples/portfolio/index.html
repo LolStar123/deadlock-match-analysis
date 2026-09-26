@@ -10,7 +10,7 @@
             <a href="https://github.com/LolStar123/deadlock-match-analysis"
                 >deadlock / match evidence</a
             ><a
-                href="https://atul-kanodia-fieldnotes.atulswaggalicious.chatgpt.site"
+                href="https://lolstar123.github.io/just-a-little-further/"
                 >atul's projects</a
             >
         </header>
@@ -48,16 +48,11 @@
                     <details>
                         <summary>what the comparison means</summary>
                         <p>
-                            We identify the team leading the chosen metric, then
-                            count how often that team won. Ties and missing
-                            checkpoints are excluded. The interval is a 95%
-                            Wilson interval; it expresses sampling uncertainty,
-                            not causal certainty.
+                            Pick a stat and checkpoint. Ties and missing values
+                            drop out. The range is a 95% Wilson interval.
                         </p>
                         <p>
-                            Changing the question after seeing the result can
-                            exaggerate findings. Match conditions, heroes and
-                            player skill still matter.
+                            This measures association, not causation.
                         </p>
                     </details>
                 </aside>
@@ -97,8 +92,7 @@
                 </section>
             </div>
             <footer>
-                Historical collection. Checkpoints: May 2026 onward. End-state
-                associations are not forecasts.
+                Historical matches from May 2026 onward.
                 <a href="data/matches.json">download the source dataset</a> /
                 <a
                     href="https://github.com/LolStar123/deadlock-match-analysis/blob/main/tools/export_matches.py"
