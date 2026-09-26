@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>deadlock / conditional win rate</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="identity.css"></head><body>
 <header><a href="https://lolstar123.github.io/just-a-little-further/">atul / deadlock</a><a href="https://github.com/LolStar123/deadlock-match-analysis">source</a></header>
 <main>
-<section class="hero"><p>statistics + coaching</p><h1>conditional win rate.</h1><span id="scope">loading matches…</span></section>
+<section class="hero"><p>statistics + coaching</p><h1>what actually wins games?</h1><span id="scope">loading matches…</span></section>
 <section class="controls"><label>stat<select id="metric"></select></label><label>minimum lead <strong id="lead-label"></strong><input id="threshold" type="range" min="0" max="20000" step="1000" value="0"></label><label>duration<select id="duration"><option value="0,120">all matches</option><option value="0,25">under 25m</option><option value="25,40">25–40m</option><option value="40,120">40m+</option></select></label></section>
 <p id="answer" class="answer" aria-live="polite"></p><p id="context" hidden></p>
 <section class="result"><div><strong id="win-rate">…</strong><span>win rate</span></div><div><strong id="sample">…</strong><span>n</span></div><div><strong id="interval">…</strong><span>95% interval</span></div></section>
