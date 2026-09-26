@@ -18,7 +18,7 @@ function render() {
         ? "This condition is measured before the match ends. It still describes association, not what would happen if a team were given extra souls."
         : "This is an end-of-match statistic. Winning can itself increase this number, so do not read it as an in-game prediction.";
     $("#answer").textContent = result.n
-        ? `Teams leading by ${fmt(threshold)} or more ${m.unit} in ${m.label} won ${pct(result.p)} of ${fmt(result.n)} qualifying matches.`
+        ? `+${fmt(threshold)} ${m.unit} · ${fmt(result.n)} matching games`
         : "No matches meet this condition. Lower the lead or include more match durations.";
     $("#win-rate").textContent = pct(result.p);
     $("#sample").textContent = fmt(result.n);
@@ -40,8 +40,7 @@ function render() {
                 `<button class="${r.leaderWon ? "win" : "loss"}" data-index="${i}" aria-label="Match ${r.id}, lead ${fmt(r.lead)}, ${r.leaderWon ? "won" : "lost"}"></button>`,
         )
         .join("");
-    $("#dot-note").textContent =
-        `Showing ${shown.length} of ${fmt(result.n)} matching games in collection order. Every dot is one match; export contains the whole selected cohort.`;
+    $("#dot-note").textContent = `${shown.length} shown · green held, red lost`;
     $("#dots").onclick = (e) => {
         const b = e.target.closest("button");
         if (!b) return;
@@ -77,8 +76,7 @@ try {
     const r = await fetch("data/matches.json");
     if (!r.ok) throw Error(r.status);
     data = await r.json();
-    $("#scope").textContent =
-        `${fmt(data.matches.length)} complete, real matches. ${data.first.slice(0, 10)} to ${data.last.slice(0, 10)}. Team-level differences from the research collection; missing checkpoints stay missing.`;
+    $("#scope").textContent = `${fmt(data.matches.length)} matches`;
     render();
 } catch (e) {
     $("#scope").textContent =

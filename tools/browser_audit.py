@@ -23,6 +23,7 @@ try:
         assert page.evaluate('__deadlock.result.n')<before
         page.locator('#metric').select_option('player_damage')
         assert 'end-of-match' in page.locator('#context').inner_text()
+        page.locator('details summary').click()
         page.locator('#dots button').first.click()
         assert 'match ' in page.locator('#match-detail').inner_text()
         with page.expect_download() as dl:page.locator('#download').click()
