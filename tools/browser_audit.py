@@ -28,6 +28,7 @@ try:
         assert 'match ' in page.locator('#match-detail').inner_text()
         with page.expect_download() as dl:page.locator('#download').click()
         assert dl.value.suggested_filename=='deadlock-cohort.csv'
+        page.locator('details summary').click()
         page.locator('#metric').select_option('nw_600')
         page.evaluate('window.scrollTo(0,0)')
         page.screenshot(path=str(ROOT/'examples/portfolio/preview.png'))
