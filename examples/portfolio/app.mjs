@@ -18,7 +18,7 @@ function render() {
         ? "This condition is measured before the match ends. It still describes association, not what would happen if a team were given extra souls."
         : "This is an end-of-match statistic. Winning can itself increase this number, so do not read it as an in-game prediction.";
     $("#answer").textContent = result.n
-        ? `+${fmt(threshold)} ${m.unit} · ${fmt(result.n)} matching games`
+        ? `+${fmt(threshold)} ${m.unit} · ${fmt(result.n)} matches · ${fmt(result.wins)} wins / ${fmt(result.n - result.wins)} losses`
         : "No matches meet this condition. Lower the lead or include more match durations.";
     $("#win-rate").textContent = pct(result.p);
     $("#sample").textContent = fmt(result.n);
@@ -30,9 +30,9 @@ function render() {
         left = 35,
         bottom = 170,
         width = (w - left) / 12;
-    $("#chart-title").textContent = m.label + " / win rate by lead size";
+    $("#chart-title").textContent = m.label + " / conditional win rate";
     $("#chart").innerHTML =
-        `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Win rate by lead size with confidence intervals">${[0, 0.5, 1].map((p) => `<line x1="35" x2="740" y1="${bottom - p * 145}" y2="${bottom - p * 145}" stroke="#3b4440"/><text x="0" y="${bottom - p * 145 + 4}" fill="#9caea2" font-size="10">${p * 100}%</text>`).join("")}${result.bins.map((b, i) => (b.n ? `<g><title>${fmt(b.lo)}-${fmt(b.hi)}: ${pct(b.p)}, n=${b.n}</title><rect x="${left + i * width + 5}" y="${bottom - b.p * 145}" width="${width - 10}" height="${b.p * 145}" fill="${b.lo >= threshold ? "#95b9a4" : "#4a6254"}"/><line x1="${left + (i + 0.5) * width}" x2="${left + (i + 0.5) * width}" y1="${bottom - b.ci[0] * 145}" y2="${bottom - b.ci[1] * 145}" stroke="#e6e0d4" stroke-width="2"/><text x="${left + (i + 0.5) * width}" y="190" text-anchor="middle" font-size="9" fill="#aab9af">${b.lo >= 1000 ? (b.lo / 1000).toFixed(1) + "k" : fmt(b.lo)}</text></g>` : "")).join("")}</svg>`;
+        `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Conditional win rate by lead size with Wilson confidence intervals">${[0, 0.5, 1].map((p) => `<line x1="35" x2="740" y1="${bottom - p * 145}" y2="${bottom - p * 145}" stroke="#3b4440"/><text x="0" y="${bottom - p * 145 + 4}" fill="#9caea2" font-size="10">${p * 100}%</text>`).join("")}${result.bins.map((b, i) => (b.n ? `<g><title>${fmt(b.lo)}-${fmt(b.hi)}: ${pct(b.p)}, n=${b.n}</title><rect rx="2" x="${left + i * width + 5}" y="${bottom - b.p * 145}" width="${width - 10}" height="${b.p * 145}" fill="${b.lo >= threshold ? "#95b9a4" : "#4a6254"}"/><line x1="${left + (i + 0.5) * width}" x2="${left + (i + 0.5) * width}" y1="${bottom - b.ci[0] * 145}" y2="${bottom - b.ci[1] * 145}" stroke="#e6e0d4" stroke-width="2"/><text x="${left + (i + 0.5) * width}" y="190" text-anchor="middle" font-size="9" fill="#aab9af">${b.lo >= 1000 ? (b.lo / 1000).toFixed(1) + "k" : fmt(b.lo)}</text></g>` : "")).join("")}</svg>`;
     const shown = result.selected.slice(0, 400);
     $("#dots").innerHTML = shown
         .map(

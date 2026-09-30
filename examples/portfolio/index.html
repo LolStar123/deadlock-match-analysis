@@ -4,7 +4,7 @@
 <section class="hero"><h1>what actually wins games?</h1><span id="scope">loading matches…</span></section>
 <section class="controls"><label>stat<select id="metric"></select></label><label>minimum lead <strong id="lead-label"></strong><input id="threshold" type="range" min="0" max="20000" step="1000" value="0"></label><label>duration<select id="duration"><option value="0,120">all matches</option><option value="0,25">under 25m</option><option value="25,40">25–40m</option><option value="40,120">40m+</option></select></label></section>
 <p id="answer" class="answer" aria-live="polite"></p><p id="context" hidden></p>
-<section class="result"><div><strong id="win-rate">…</strong><span>win rate</span></div><div><strong id="sample">…</strong><span>n</span></div><div><strong id="interval">…</strong><span>95% interval</span></div></section>
+<section class="result"><div><strong id="win-rate">…</strong><span>P(win | lead)</span></div><div><strong id="sample">…</strong><span>matches, n</span></div><div><strong id="interval">…</strong><span>95% interval</span></div></section>
 <section class="chart"><h2 id="chart-title">win rate by lead</h2><div id="chart"></div></section>
 <details><summary>matching games</summary><div id="dots"></div><p id="dot-note"></p><p id="match-detail">choose a dot.</p><button id="download">export cohort</button></details>
 </main><script type="module" src="app.mjs"></script></body></html>
