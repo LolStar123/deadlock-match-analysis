@@ -52,6 +52,7 @@ details > button { padding: 7px 10px; border: 1px solid var(--line); background:
   .controls label:first-child { grid-column: 1/-1; }
   .result strong { font-size: 25px; }
   #dots { grid-template-columns: repeat(20, minmax(0, 1fr)); }
+  #chart svg { height: 220px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

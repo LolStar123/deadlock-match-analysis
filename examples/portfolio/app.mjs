@@ -25,14 +25,21 @@ function render() {
     $("#interval").textContent = result.ci
         ? result.ci.map((p) => Math.round(p * 100)).join("-") + "%"
         : "no sample";
-    const w = 740,
-        h = 205,
-        left = 35,
-        bottom = 170,
-        width = (w - left) / 12;
+    const mobile = matchMedia("(max-width: 650px)").matches,
+        chart = $("#chart"),
+        w = Math.max(mobile ? 320 : 640, Math.floor(chart.clientWidth || 740)),
+        h = mobile ? 220 : 205,
+        left = mobile ? 34 : 35,
+        right = mobile ? 8 : 0,
+        bottom = mobile ? 184 : 170,
+        plotHeight = mobile ? 150 : 145,
+        width = (w - left - right) / 12,
+        axisFont = mobile ? 11 : 10,
+        labelFont = mobile ? 10 : 9,
+        showLabel = (i) => !mobile || i % 2 === 0;
     $("#chart-title").textContent = m.label + " / conditional win rate";
     $("#chart").innerHTML =
-        `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Conditional win rate by lead size with Wilson confidence intervals">${[0, 0.5, 1].map((p) => `<line x1="35" x2="740" y1="${bottom - p * 145}" y2="${bottom - p * 145}" stroke="#3b4440"/><text x="0" y="${bottom - p * 145 + 4}" fill="#9caea2" font-size="10">${p * 100}%</text>`).join("")}${result.bins.map((b, i) => (b.n ? `<g><title>${fmt(b.lo)}-${fmt(b.hi)}: ${pct(b.p)}, n=${b.n}</title><rect rx="2" x="${left + i * width + 5}" y="${bottom - b.p * 145}" width="${width - 10}" height="${b.p * 145}" fill="${b.lo >= threshold ? "#95b9a4" : "#4a6254"}"/><line x1="${left + (i + 0.5) * width}" x2="${left + (i + 0.5) * width}" y1="${bottom - b.ci[0] * 145}" y2="${bottom - b.ci[1] * 145}" stroke="#e6e0d4" stroke-width="2"/><text x="${left + (i + 0.5) * width}" y="190" text-anchor="middle" font-size="9" fill="#aab9af">${b.lo >= 1000 ? (b.lo / 1000).toFixed(1) + "k" : fmt(b.lo)}</text></g>` : "")).join("")}</svg>`;
+        `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Conditional win rate by lead size with Wilson confidence intervals">${[0, 0.5, 1].map((p) => `<line x1="${left}" x2="${w - right}" y1="${bottom - p * plotHeight}" y2="${bottom - p * plotHeight}" stroke="#3b4440"/><text x="2" y="${bottom - p * plotHeight + 4}" fill="#9caea2" font-size="${axisFont}">${p * 100}%</text>`).join("")}${result.bins.map((b, i) => { if (!b.n) return ""; const x = left + i * width + 4, barWidth = Math.max(2, width - 8), cx = left + (i + 0.5) * width, label = showLabel(i) ? `<text x="${cx}" y="${mobile ? 208 : 190}" text-anchor="middle" font-size="${labelFont}" fill="#aab9af">${b.lo >= 1000 ? (b.lo / 1000).toFixed(1) + "k" : fmt(b.lo)}</text>` : ""; return `<g><title>${fmt(b.lo)}-${fmt(b.hi)}: ${pct(b.p)}, n=${b.n}</title><rect rx="2" x="${x}" y="${bottom - b.p * plotHeight}" width="${barWidth}" height="${b.p * plotHeight}" fill="${b.lo >= threshold ? "#95b9a4" : "#4a6254"}"/><line x1="${cx}" x2="${cx}" y1="${bottom - b.ci[0] * plotHeight}" y2="${bottom - b.ci[1] * plotHeight}" stroke="#e6e0d4" stroke-width="2"/>${label}</g>`; }).join("")}</svg>`;
     const shown = result.selected.slice(0, 400);
     $("#dots").innerHTML = shown
         .map(
@@ -59,6 +66,12 @@ $("#metric").onchange = () => {
 };
 $("#threshold").oninput = render;
 $("#duration").onchange = render;
+let resizeTimer;
+addEventListener("resize", () => {
+    if (!data) return;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(render, 100);
+}, { passive: true });
 $("#download").onclick = () => {
     const keys = ["id", "date", "duration", "lead", "leaderWon"],
         text = [
