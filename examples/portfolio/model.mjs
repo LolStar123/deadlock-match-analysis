@@ -71,13 +71,15 @@ export function analyse(
 ) {
     if (!metrics[metric] || !Number.isFinite(minimum) || minimum < 0)
         throw Error("Invalid metric or threshold");
+    if (!Number.isFinite(minMinutes) || !Number.isFinite(maxMinutes) || minMinutes < 0 || minMinutes >= maxMinutes)
+        throw Error("Invalid duration range");
     const eligible = rows
         .filter(
             (r) =>
                 Number.isFinite(r[metric]) &&
                 r[metric] !== 0 &&
                 r.duration / 60 >= minMinutes &&
-                r.duration / 60 <= maxMinutes,
+                r.duration / 60 < maxMinutes,
         )
         .map((r) => ({
             ...r,

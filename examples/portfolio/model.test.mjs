@@ -36,3 +36,11 @@ test("real census is unique, complete and changes with the condition", () => {
     assert.notEqual(a.p, b.p);
     assert.ok(a.n < d.matches.length);
 });
+test("adjacent duration cohorts do not double-count boundary matches", () => {
+    const rows = [1499, 1500, 2399, 2400].map((duration, id) => ({ id, duration, win: 1, nw_600: 100 }));
+    const cohorts = [[0, 25], [25, 40], [40, 120]].map(([lo, hi]) => analyse(rows, "nw_600", 0, lo, hi));
+    assert.deepEqual(cohorts.map((r) => r.n), [1, 2, 1]);
+    assert.equal(new Set(cohorts.flatMap((r) => r.selected.map((m) => m.id))).size, 4);
+    assert.throws(() => analyse(rows, "nw_600", 0, 40, 25));
+    assert.throws(() => analyse(rows, "nw_600", 0, NaN, 25));
+});

@@ -15,31 +15,28 @@ function render() {
     result = analyse(data.matches, key, threshold, lo, hi);
     $("#lead-label").textContent = fmt(threshold) + " " + m.unit;
     $("#context").textContent = m.checkpoint
-        ? "This condition is measured before the match ends. It still describes association, not what would happen if a team were given extra souls."
-        : "This is an end-of-match statistic. Winning can itself increase this number, so do not read it as an in-game prediction.";
+        ? "Measured during play. Association does not establish causation."
+        : "An end-of-match statistic. Winning can increase it; this is not a prediction.";
     $("#answer").textContent = result.n
-        ? `+${fmt(threshold)} ${m.unit} · ${fmt(result.n)} matches · ${fmt(result.wins)} wins / ${fmt(result.n - result.wins)} losses`
+        ? (m.checkpoint ? "Checkpoint comparison" : "End-of-match association")
         : "No matches meet this condition. Lower the lead or include more match durations.";
     $("#win-rate").textContent = pct(result.p);
+    $("#win-rate").classList.toggle("empty", result.p === null);
     $("#sample").textContent = fmt(result.n);
     $("#interval").textContent = result.ci
-        ? result.ci.map((p) => Math.round(p * 100)).join("-") + "%"
+        ? result.ci.map((p) => (p * 100).toFixed(1)).join(" to ") + "%"
         : "no sample";
-    const mobile = matchMedia("(max-width: 650px)").matches,
-        chart = $("#chart"),
-        w = Math.max(mobile ? 320 : 640, Math.floor(chart.clientWidth || 740)),
-        h = mobile ? 220 : 205,
-        left = mobile ? 34 : 35,
-        right = mobile ? 8 : 0,
-        bottom = mobile ? 184 : 170,
-        plotHeight = mobile ? 150 : 145,
-        width = (w - left - right) / 12,
-        axisFont = mobile ? 11 : 10,
-        labelFont = mobile ? 10 : 9,
-        showLabel = (i) => !mobile || i % 2 === 0;
-    $("#chart-title").textContent = m.label + " / conditional win rate";
-    $("#chart").innerHTML =
-        `<svg viewBox="0 0 ${w} ${h}" role="img" aria-label="Conditional win rate by lead size with Wilson confidence intervals">${[0, 0.5, 1].map((p) => `<line x1="${left}" x2="${w - right}" y1="${bottom - p * plotHeight}" y2="${bottom - p * plotHeight}" stroke="#3b4440"/><text x="2" y="${bottom - p * plotHeight + 4}" fill="#9caea2" font-size="${axisFont}">${p * 100}%</text>`).join("")}${result.bins.map((b, i) => { if (!b.n) return ""; const x = left + i * width + 4, barWidth = Math.max(2, width - 8), cx = left + (i + 0.5) * width, label = showLabel(i) ? `<text x="${cx}" y="${mobile ? 208 : 190}" text-anchor="middle" font-size="${labelFont}" fill="#aab9af">${b.lo >= 1000 ? (b.lo / 1000).toFixed(1) + "k" : fmt(b.lo)}</text>` : ""; return `<g><title>${fmt(b.lo)}-${fmt(b.hi)}: ${pct(b.p)}, n=${b.n}</title><rect rx="2" x="${x}" y="${bottom - b.p * plotHeight}" width="${barWidth}" height="${b.p * plotHeight}" fill="${b.lo >= threshold ? "#95b9a4" : "#4a6254"}"/><line x1="${cx}" x2="${cx}" y1="${bottom - b.ci[0] * plotHeight}" y2="${bottom - b.ci[1] * plotHeight}" stroke="#e6e0d4" stroke-width="2"/>${label}</g>`; }).join("")}</svg>`;
+    const short = (n) => n >= 1000 ? (n / 1000).toFixed(1) + "k" : fmt(n);
+    $("#chart-title").textContent = "Win rate by lead size";
+    const axis = '<div class="chart-axis"><span>Lead</span><div><span>0%</span><span>50%</span><span>100%</span></div><span>Win rate / n</span></div>';
+    const drawBin = (b) => {
+            const colour = b.lo >= threshold ? "#9fcabc" : "#8597a8";
+            const marks = b.n ? `<line x1="${b.ci[0]*100}%" x2="${b.ci[1]*100}%" y1="13" y2="13" stroke="${colour}" stroke-width="2"/><circle cx="${b.p*100}%" cy="13" r="3" fill="${colour}"/>` : "";
+            return `<div class="bin ${b.lo >= threshold ? "selected" : ""}"><span>${short(b.lo)} to ${short(b.hi)}</span><svg role="img" aria-label="${b.n ? pct(b.p) + ', 95% interval ' + b.ci.map(pct).join(' to ') + ', ' + b.n + ' matches' : 'No matches in this lead range'}"><line x1="0" x2="100%" y1="13" y2="13" stroke="#39434e" stroke-width="1"/><line x1="50%" x2="50%" y1="3" y2="23" stroke="#53606d" stroke-dasharray="2 3"/>${marks}</svg><span class="bin-value">${pct(b.p)}<small>n = ${fmt(b.n)}</small></span></div>`;
+        };
+    const ordinary = result.bins.filter((b) => b.n >= 10), sparse = result.bins.filter((b) => b.n < 10);
+    $("#chart").innerHTML = axis + ordinary.map(drawBin).join("") +
+        (sparse.length ? `<details class="sparse-bins"><summary>Show ${sparse.length} small cohorts (fewer than 10 matches)</summary><p class="chart-note">Small samples have wider uncertainty. Every original range is shown below.</p>${axis}${sparse.map(drawBin).join("")}</details>` : "");
     const shown = result.selected.slice(0, 400);
     $("#dots").innerHTML = shown
         .map(
@@ -47,7 +44,11 @@ function render() {
                 `<button class="${r.leaderWon ? "win" : "loss"}" data-index="${i}" aria-label="Match ${r.id}, lead ${fmt(r.lead)}, ${r.leaderWon ? "won" : "lost"}"></button>`,
         )
         .join("");
-    $("#dot-note").textContent = `${shown.length} shown · green held, red lost`;
+    $("#dot-note").textContent = `${shown.length} of ${fmt(result.n)} shown · green won, red lost. Export includes all matching games.`;
+    const inDuration = data.matches.filter((r) => r.duration / 60 >= lo && r.duration / 60 < hi).length;
+    $("#coverage").textContent = `${fmt(inDuration - result.eligible)} games excluded in this duration range: tied or missing observations.`;
+    $("#match-detail").textContent = "Choose a match to inspect its lead and outcome.";
+    $("#download").disabled = !result.n;
     $("#dots").onclick = (e) => {
         const b = e.target.closest("button");
         if (!b) return;
@@ -89,10 +90,11 @@ try {
     const r = await fetch("data/matches.json");
     if (!r.ok) throw Error(r.status);
     data = await r.json();
-    $("#scope").textContent = `${fmt(data.matches.length)} matches`;
+    $("#scope").textContent = `${fmt(data.matches.length)} complete matches / 26 May to 5 June 2026`;
+    document.querySelectorAll("select, input, #download").forEach((el) => el.disabled = false);
     render();
 } catch (e) {
     $("#scope").textContent =
         "The match archive could not load. Reload to retry; no generated matches have been substituted.";
-    throw e;
+    $("#answer").textContent = "Reload this page to retry the archive.";
 }
