@@ -24,7 +24,7 @@ try:
         page.locator('#threshold').fill('5000');page.locator('#threshold').dispatch_event('input')
         assert page.evaluate('__deadlock.result.n')<before
         page.locator('#metric').select_option('player_damage')
-        assert 'end-of-match' in page.locator('#context').inner_text()
+        assert 'End-of-match' in page.locator('#answer').inner_text()
         page.locator('#cohort summary').click()
         page.locator('#dots button').first.click()
         assert 'match ' in page.locator('#match-detail').inner_text()

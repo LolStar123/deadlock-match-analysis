@@ -14,17 +14,14 @@ function render() {
         [lo, hi] = $("#duration").value.split(",").map(Number);
     result = analyse(data.matches, key, threshold, lo, hi);
     $("#lead-label").textContent = fmt(threshold) + " " + m.unit;
-    $("#context").textContent = m.checkpoint
-        ? "Measured during play. Association does not establish causation."
-        : "An end-of-match statistic. Winning can increase it; this is not a prediction.";
     $("#answer").textContent = result.n
-        ? (m.checkpoint ? "Checkpoint comparison" : "End-of-match association")
+        ? (m.checkpoint ? "" : "End-of-match association")
         : "No matches meet this condition. Lower the lead or include more match durations.";
     $("#win-rate").textContent = pct(result.p);
     $("#win-rate").classList.toggle("empty", result.p === null);
     $("#sample").textContent = fmt(result.n);
     $("#interval").textContent = result.ci
-        ? result.ci.map((p) => (p * 100).toFixed(1)).join(" to ") + "%"
+        ? result.ci.map((p) => (p * 100).toFixed(1)).join("–") + "%"
         : "no sample";
     const short = (n) => n >= 1000 ? (n / 1000).toFixed(1) + "k" : fmt(n);
     $("#chart-title").textContent = "Win rate by lead size";
@@ -36,7 +33,7 @@ function render() {
         };
     const ordinary = result.bins.filter((b) => b.n >= 10), sparse = result.bins.filter((b) => b.n < 10);
     $("#chart").innerHTML = axis + ordinary.map(drawBin).join("") +
-        (sparse.length ? `<details class="sparse-bins"><summary>Show ${sparse.length} small cohorts (fewer than 10 matches)</summary><p class="chart-note">Small samples have wider uncertainty. Every original range is shown below.</p>${axis}${sparse.map(drawBin).join("")}</details>` : "");
+        (sparse.length ? `<details class="sparse-bins"><summary>Small cohorts (n &lt; 10)</summary>${axis}${sparse.map(drawBin).join("")}</details>` : "");
     const shown = result.selected.slice(0, 400);
     $("#dots").innerHTML = shown
         .map(
@@ -44,10 +41,10 @@ function render() {
                 `<button class="${r.leaderWon ? "win" : "loss"}" data-index="${i}" aria-label="Match ${r.id}, lead ${fmt(r.lead)}, ${r.leaderWon ? "won" : "lost"}"></button>`,
         )
         .join("");
-    $("#dot-note").textContent = `${shown.length} of ${fmt(result.n)} shown · green won, red lost. Export includes all matching games.`;
+    $("#dot-note").textContent = `${shown.length} / ${fmt(result.n)} shown · green: won · red: lost`;
     const inDuration = data.matches.filter((r) => r.duration / 60 >= lo && r.duration / 60 < hi).length;
-    $("#coverage").textContent = `${fmt(inDuration - result.eligible)} games excluded in this duration range: tied or missing observations.`;
-    $("#match-detail").textContent = "Choose a match to inspect its lead and outcome.";
+    $("#coverage").textContent = `${fmt(inDuration - result.eligible)} excluded: tied / missing`;
+    $("#match-detail").textContent = "Select a match.";
     $("#download").disabled = !result.n;
     $("#dots").onclick = (e) => {
         const b = e.target.closest("button");
@@ -95,6 +92,6 @@ try {
     render();
 } catch (e) {
     $("#scope").textContent =
-        "The match archive could not load. Reload to retry; no generated matches have been substituted.";
-    $("#answer").textContent = "Reload this page to retry the archive.";
+        "The match archive could not load. Reload to retry.";
+    $("#answer").textContent = "";
 }
